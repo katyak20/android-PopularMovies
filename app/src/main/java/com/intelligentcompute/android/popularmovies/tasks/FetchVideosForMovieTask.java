@@ -57,7 +57,7 @@ public class FetchVideosForMovieTask extends AsyncTask<ArrayList<String>, Void, 
                     final String API_KEY_PARAM = "api_key";
 
                     Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
-                            .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
+                            .appendQueryParameter(API_KEY_PARAM, "***")
                             .build();
 
                     URL url = new URL(builtUri.toString());

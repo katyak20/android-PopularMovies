@@ -78,7 +78,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendQueryParameter(SORTING_PARAM, params[0])
                             //.appendQueryParameter(CERTIFICATION_PARAM, certification_country)
-                    .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
+                    .appendQueryParameter(API_KEY_PARAM, "***")
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -206,7 +206,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
                 popularMovies.add(movieDetailsList);
                 movieIDsList.add(String.valueOf(movieId));
 
-                resultStrs.add("http://image.tmdb.org/t/p/w300/" + posterPath + "&api_key=e257613f461ed40c956dc1464fb16313");
+                resultStrs.add("http://image.tmdb.org/t/p/w300/" + posterPath + "&api_key=***");
 
             }
             catch (JSONException e) {
