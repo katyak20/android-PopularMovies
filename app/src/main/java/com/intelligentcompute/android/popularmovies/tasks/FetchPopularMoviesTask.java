@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.intelligentcompute.android.popularmovies.ImageAdapter;
+import com.intelligentcompute.android.popularmovies.PopularMoviesAdapter;
+import com.intelligentcompute.android.popularmovies.PopularMoviesFragment;
 import com.intelligentcompute.android.popularmovies.VideoForListFragmentEntry;
 import com.intelligentcompute.android.popularmovies.data.MovieContract;
 
@@ -32,7 +34,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
 
     private final String LOG_TAG = FetchPopularMoviesTask.class.getSimpleName();
 
-    private ImageAdapter mMoviePostersAdapter;
+    private PopularMoviesAdapter mMoviePostersAdapter;
     private final Context mContext;
     private ArrayList<ArrayList<String>> popularMovies= new ArrayList<>();
     private ArrayList<String> movieIDsList = new ArrayList<String>();
@@ -44,12 +46,6 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
         mContext = context;
     }
 
-    public FetchPopularMoviesTask(Context context, ImageAdapter moviePostersAdapter) {
-        mContext = context;
-        mMoviePostersAdapter = moviePostersAdapter;
-       // moviesReviews = new HashMap<>();
-       // moviesVideos = new HashMap<>();
-    }
     @Override
     protected ArrayList<String> doInBackground(String... params) {
 
@@ -65,7 +61,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
 
 
         // Will contain the raw JSON response as a string.
-        String sort_by = "popularity.desc";
+        String sort_by = "popularity";
         String certification_country = "UK";
 
         try {
@@ -82,7 +78,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendQueryParameter(SORTING_PARAM, params[0])
                             //.appendQueryParameter(CERTIFICATION_PARAM, certification_country)
-                    .appendQueryParameter(API_KEY_PARAM, "***")
+                    .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -146,31 +142,13 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
     protected void onPostExecute(ArrayList<String> result) {
         if (result != null) {
             //mMoviePostersAdapter.clear();
-            mMoviePostersAdapter.updateThumbnails(result);
+//            mMoviePostersAdapter.updateThumbnails(result);
             Log.i(LOG_TAG, " REACHED OnPostExecute" + result.get(0) + result.get(1));
-            FetchReviewsForMovieTask reviewsTask = new FetchReviewsForMovieTask(mContext);
-            reviewsTask.execute(movieIDsList);
+           FetchReviewsForMovieTask reviewsTask = new FetchReviewsForMovieTask(mContext);
+            reviewsTask.execute(result);
 
             FetchVideosForMovieTask videosTask = new FetchVideosForMovieTask(mContext);
-            videosTask.execute(movieIDsList);
-           /* try {
-                 moviesReviews = reviewsTask.execute(movieIDsList).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            // moviesReviews = reviewsTask.getMoviesReviews();
-             videosTask = new FetchVideosForMovieTask(mContext);
-            try {
-                moviesVideos = videosTask.execute(movieIDsList).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }*/
-
-
+            videosTask.execute(result);
         }
         Log.i(LOG_TAG, " REACHED OnPostExecute");
     }
@@ -215,7 +193,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
                 popularity = movie.getString(MOVIE_POPULARITY);
                 movieId = movie.getInt(MOVIE_ID);
 
-                int myMovieId = addMovie(movieId, title, releaseDate, posterPath, Double.parseDouble(popularity), Double.parseDouble(voteAverage), overview);
+                long myMovieId = addMovie(movieId, title, releaseDate, posterPath, Double.parseDouble(popularity), Double.parseDouble(voteAverage), overview);
 
                 ArrayList<String> movieDetailsList = new ArrayList<>();
                 movieDetailsList.add(String.valueOf(movieId));
@@ -228,7 +206,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
                 popularMovies.add(movieDetailsList);
                 movieIDsList.add(String.valueOf(movieId));
 
-                resultStrs.add("http://image.tmdb.org/t/p/w300/" + posterPath + "&api_key=***");
+                resultStrs.add("http://image.tmdb.org/t/p/w300/" + posterPath + "&api_key=e257613f461ed40c956dc1464fb16313");
 
             }
             catch (JSONException e) {
@@ -241,7 +219,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
         for (String s : resultStrs) {
             Log.v(LOG_TAG, "Movie entry: " + s);
         }
-        return resultStrs;
+        return movieIDsList;
 
     }
 
@@ -249,21 +227,21 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
         return popularMovies;
     }
 
-    public int addMovie(int myMovieId, String movieTitle, String releaseDate, String posterPath, double popularity,
+    public long addMovie(long myMovieId, String movieTitle, String releaseDate, String posterPath, double popularity,
                          double voteAverage, String overview) {
-        int movieId;
+        long movieId;
 
         // First, check if the movie entry exists in the db
         Cursor movieCursor = mContext.getContentResolver().query(
                 MovieContract.MovieEntry.CONTENT_URI,
-                new String[]{MovieContract.MovieEntry.COLUMN_MOVIE_ID},
+                new String[]{MovieContract.MovieEntry._ID},
                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
                 new String[]{String.valueOf(myMovieId)},
                 null);
 
         if (movieCursor.moveToFirst()) {
-            int movieIdIndex = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
-            movieId = movieCursor.getInt(movieIdIndex);
+            int movieIdIndex = movieCursor.getColumnIndex(MovieContract.MovieEntry._ID);
+            movieId = movieCursor.getLong(movieIdIndex);
         } else {
             // Now that the content provider is set up, inserting rows of data is pretty simple.
             // First create a ContentValues object to hold the data you want to insert.
@@ -286,7 +264,7 @@ public class FetchPopularMoviesTask extends AsyncTask<String, Void, ArrayList<St
             );
 
             // The resulting URI contains the ID for the row.  Extract the movieId from the Uri.
-            movieId = (int) ContentUris.parseId(insertedUri);
+            movieId = ContentUris.parseId(insertedUri);
         }
 
         movieCursor.close();

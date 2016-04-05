@@ -22,17 +22,28 @@ public class ReviewsListFragment extends Fragment {
     int fragNum;
     String arr[] = { "This is", "a Truiton", "Demo", "App", "For", "Showing",
             "FragmentPagerAdapter", "and ViewPager", "Implementation" };
+    static  ArrayList<HashMap<String, String>> reviewsForMovie = new ArrayList<>();
 
     static ReviewsListFragment init(int val) {
-        ReviewsListFragment truitonList = new ReviewsListFragment();
-
-
-        // Supply val input as an argument.
+        ReviewsListFragment reviewsList = new ReviewsListFragment();
         Bundle args = new Bundle();
         args.putInt("val", val);
-        truitonList.setArguments(args);
+        reviewsList.setArguments(args);
+      /*  Bundle args = new Bundle();
+        args.putArrayList("reviews", reviewsForMovie);
+        reviewsList.setArguments(args);*/
 
-        return truitonList;
+        return reviewsList;
+    }
+    static ReviewsListFragment init(ArrayList<HashMap<String, String>> reviews) {
+        ReviewsListFragment reviewsList = new ReviewsListFragment();
+        reviewsForMovie = reviews;
+
+        /*Bundle args = new Bundle();
+        args.putArrayList("reviews", reviewsForMovie);
+        reviewsList.setArguments(args);*/
+
+        return reviewsList;
     }
 
     /**
@@ -55,19 +66,19 @@ public class ReviewsListFragment extends Fragment {
                 container, false);
         Intent intent = getActivity().getIntent();
         Bundle myBundle= intent.getExtras();
-        if (intent.hasExtra("reviews")) {
+        if (reviewsForMovie != null) {
 
-            ArrayList<HashMap<String, String>> myArrList = (ArrayList)myBundle.getSerializable("reviews");
+            //ArrayList<HashMap<String, String>> myArrList = (ArrayList)myBundle.getSerializable("reviews");
             ListView reviews = (ListView)layoutView.findViewById(R.id.reviews_list);
 
-            SimpleAdapter adapter = new SimpleAdapter(this.getContext(), myArrList, android.R.layout.two_line_list_item,//simple_list_item_2,
+            SimpleAdapter adapter = new SimpleAdapter(this.getContext(), reviewsForMovie, android.R.layout.two_line_list_item,//simple_list_item_2,
                     new String[] {"author", "content"},
                     new int[] {android.R.id.text1, android.R.id.text2});
             reviews.setAdapter(adapter);
 
         }
-        View tv = layoutView.findViewById(R.id.text);
-        ((TextView) tv).setText("Truiton Fragment #" + fragNum);
+       /* View tv = layoutView.findViewById(R.id.text);
+        ((TextView) tv).setText("Truiton Fragment #" + fragNum);*/
         return layoutView;
     }
 

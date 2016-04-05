@@ -14,10 +14,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,76 +43,98 @@ public class FetchVideosForMovieTask extends AsyncTask<ArrayList<String>, Void, 
 
         ArrayList<String> moviesIds = movieIds[0];
 //            Toast.makeText(getActivity(), movieId[0], Toast.LENGTH_LONG).show();
+
         for (String id : moviesIds) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
 
-            String trailersJsonStr = null;
+                HttpURLConnection urlConnection = null;
+                BufferedReader reader = null;
 
-            try {
-                String VIDEO_BASE_URL =
-                        "http://api.themoviedb.org/3/movie/" + id + "/videos?";
-                final String API_KEY_PARAM = "api_key";
+                String trailersJsonStr = null;
 
-                Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY_PARAM, "****")
-                        .build();
+                try {
+                    String VIDEO_BASE_URL =
+                            "http://api.themoviedb.org/3/movie/" + id + "/videos?";
+                    final String API_KEY_PARAM = "api_key";
 
-                URL url = new URL(builtUri.toString());
+                    Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
+                            .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
+                            .build();
 
-                Log.v(LOG_TAG, "Built URI " + builtUri.toString());
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
+                    URL url = new URL(builtUri.toString());
 
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
+                    Log.v(LOG_TAG, "Built URI " + builtUri.toString());
+                    // Create the request to OpenWeatherMap, and open the connection
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.connect();
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
+                    //Check response
+               /* int status = urlConnection.getResponseCode();
+                InputStream inputStream;
+                if(status >= HttpStatus.SC_BAD_REQUEST)
+                    inputStream = urlConnection.getErrorStream();
+                else
+                    inputStream = urlConnection.getInputStream();*/
 
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                trailersJsonStr = buffer.toString();
-            } catch (IOException e) {
-                Log.e("PopularMoviesFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
+                    // Read the input stream into a String
+                    InputStream inputStream;
+                    StringBuffer buffer;
                     try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PopularMoviesFragment", "Error closing stream", e);
+                        inputStream = urlConnection.getInputStream();
+                        buffer = new StringBuffer();
+                        if (inputStream == null) {
+                            // Nothing to do.
+                            return null;
+                        }
+                        reader = new BufferedReader(new InputStreamReader(inputStream));
+                    } catch (FileNotFoundException e) {
+                        Log.e("VideoFor Movies Task", "Error ", e);
+                        // If the code didn't successfully get the weather data, there's no point in attemping
+                        // to parse it.
+                        return null;
+                    }
+                /*InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();*/
+
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                        // But it does make debugging a *lot* easier if you print out the completed
+                        // buffer for debugging.
+                        buffer.append(line + "\n");
+                    }
+
+                    if (buffer.length() == 0) {
+                        // Stream was empty.  No point in parsing.
+                        return null;
+                    }
+                    trailersJsonStr = buffer.toString();
+                } catch (IOException e) {
+                    Log.e("VideoFor Movies Task", "Error ", e);
+                    // If the code didn't successfully get the weather data, there's no point in attemping
+                    // to parse it.
+                    return null;
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (final IOException e) {
+                            Log.e("PopularMoviesFragment", "Error closing stream", e);
+                        }
                     }
                 }
-            }
-            try {
-                moviesVideos.put(id, getOfficialTrailerLinkFromJson(trailersJsonStr));
+                try {
+                    moviesVideos.put(id, getOfficialTrailerLinkFromJson(trailersJsonStr));
 
-                //return getOfficialTrailerLinkFromJson(trailersJsonStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
+                    //return getOfficialTrailerLinkFromJson(trailersJsonStr);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getMessage(), e);
+                    e.printStackTrace();
+                }
+
         }
         return moviesVideos;
     }

@@ -44,47 +44,7 @@ public class FetchReviewsForMovieTask  extends AsyncTask<ArrayList<String>, Void
 
 
         ///TO DOOOOO
-     /*   int movieId;
 
-        // First, check if the movie entry exists in the db
-        Cursor movieCursor = mContext.getContentResolver().query(
-                MovieContract.MovieEntry.CONTENT_URI,
-                new String[]{MovieContract.MovieEntry.COLUMN_MOVIE_ID},
-                MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                new String[]{String.valueOf(myMovieId)},
-                null);
-
-        if (movieCursor.moveToFirst()) {
-            int movieIdIndex = movieCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
-            movieId = movieCursor.getInt(movieIdIndex);
-        } else {
-            // Now that the content provider is set up, inserting rows of data is pretty simple.
-            // First create a ContentValues object to hold the data you want to insert.
-            ContentValues movieValues = new ContentValues();
-
-            // Then add the data, along with the corresponding name of the data type,
-            // so the content provider knows what kind of value is being inserted.
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, myMovieId);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movieTitle);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY, popularity);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW, overview);
-
-            // Finally, insert location data into the database.
-            Uri insertedUri = mContext.getContentResolver().insert(
-                    MovieContract.MovieEntry.CONTENT_URI,
-                    movieValues
-            );
-
-            // The resulting URI contains the ID for the row.  Extract the movieId from the Uri.
-            movieId = (int) ContentUris.parseId(insertedUri);
-        }
-
-        movieCursor.close();
-        // Wait, that worked?  Yes!
-        return movieId;*/
         return  1;
     }
 
@@ -110,7 +70,7 @@ public class FetchReviewsForMovieTask  extends AsyncTask<ArrayList<String>, Void
                 final String API_KEY_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY_PARAM, "****")
+                        .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
                         .build();
 
                 URL url = new URL(builtUri.toString());

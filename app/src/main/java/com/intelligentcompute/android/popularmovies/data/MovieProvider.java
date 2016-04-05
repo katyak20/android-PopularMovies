@@ -28,12 +28,12 @@ public class MovieProvider extends ContentProvider {
    /* static final int MOVIE_WITH_REVIEWS = 111;
     static final int MOVIE_WITH_REVIEWS_AND_VIDEOS =112; */
 
-    private static final SQLiteQueryBuilder sReviewsForMovieIdQueryBuilder;
+  /*  private static final SQLiteQueryBuilder sReviewsForMovieIdQueryBuilder;
 
     static {
         sReviewsForMovieIdQueryBuilder = new SQLiteQueryBuilder();
         //This is an inner join which looks like
-        //weather INNER JOIN location ON weather.location_id = location._id
+        //weather INNER JOIN location ON movie.movie_id = reviews.movie_id
         sReviewsForMovieIdQueryBuilder.setTables(
                 MovieContract.ReviewsEntry.TABLE_NAME + " INNER JOIN " +
                         MovieContract.MovieEntry.TABLE_NAME +
@@ -41,7 +41,7 @@ public class MovieProvider extends ContentProvider {
                         "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY +
                         " = " + MovieContract.MovieEntry.TABLE_NAME +
                         "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID);
-    }
+    }*/
 
     private static final SQLiteQueryBuilder sVideosByMovieIdQueryBuilder;
 
@@ -72,19 +72,18 @@ public class MovieProvider extends ContentProvider {
                     "." + MovieContract.VideoEntry.COLUMN_MOVIE_KEY + " = ? ";
 
 
-    private Cursor getReviewsForMovie(Uri uri, String[] projection, String sortOrder) {
+    private Cursor getReviewsForMovie(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         String movieIdFromUri = MovieContract.ReviewsEntry.getMovieIdFromUri(uri);
        // long startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
 
-        String[] selectionArgs;
-        String selection;
+
 
         selection = sReviewsByMovieIdSelection;
         selectionArgs = new String[]{movieIdFromUri};
 
 
 
-        return sReviewsForMovieIdQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return mOpenHelper.getReadableDatabase().query(MovieContract.ReviewsEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -106,7 +105,7 @@ public class MovieProvider extends ContentProvider {
 
 
 
-        return sVideosByMovieIdQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return mOpenHelper.getReadableDatabase().query(MovieContract.VideoEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -218,10 +217,10 @@ public class MovieProvider extends ContentProvider {
             }
             // "reviews/*"
             case REVIEWS_FOR_MOVIE: {
-                retCursor = getReviewsForMovie(uri, projection, sortOrder);
+                retCursor = getReviewsForMovie(uri, projection, selection, selectionArgs, sortOrder);
                 break;
             }
-            // "MOVIES"
+            // "movies"
             case MOVIES: {
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
@@ -301,9 +300,9 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIES: {
-                long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
-                if ( _id > 0 )
-                    returnUri = MovieContract.MovieEntry.buildMovieUri(_id);
+                long movie_id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
+                if ( movie_id > 0 )
+                    returnUri = MovieContract.MovieEntry.buildMovieUri(movie_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;

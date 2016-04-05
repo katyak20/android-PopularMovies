@@ -22,12 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by katya on 03/03/2016.
- */
 public class VideoListFragment extends ListFragment {   // public static final class VideoListFragment extends ListFragment {
 
-    private ArrayList<VideoForListFragmentEntry> videoList;
+    private static ArrayList<VideoForListFragmentEntry> videoList;
 
     static VideoListFragment init(int val) {
         VideoListFragment truitonFrag = new VideoListFragment();
@@ -39,6 +36,12 @@ public class VideoListFragment extends ListFragment {   // public static final c
         return truitonFrag;
     }
 
+    static VideoListFragment init(ArrayList<VideoForListFragmentEntry> listOfVideos) {
+        VideoListFragment videoListFragment = new VideoListFragment();
+        videoList =listOfVideos;
+
+        return videoListFragment;
+    }
     private PageAdapter adapter;
     private View videoBox;
 

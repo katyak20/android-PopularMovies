@@ -21,7 +21,7 @@ public class MovieContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 
-    public static final String PATH_MOVIE = "movie";
+    public static final String PATH_MOVIE = "movies";
     public static final String PATH_REVIEW = "reviews";
     public static final String PATH_VIDEO = "videos";
 
@@ -118,10 +118,11 @@ public class MovieContract {
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+
         }
 
-       public static Uri buildSelectedMovieUri(String movieId) {
-            return CONTENT_URI.buildUpon().appendPath(movieId).build();
+       public static Uri buildSelectedMovieUri(int movieId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
 /*
         public static Uri buildVideosForMovie(String movieId) {

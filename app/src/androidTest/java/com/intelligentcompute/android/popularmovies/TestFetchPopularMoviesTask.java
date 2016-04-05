@@ -15,7 +15,9 @@ public class TestFetchPopularMoviesTask extends AndroidTestCase {
     static final double ADD_MOVIE_POPULARITY = 91.377529;
     static final double ADD_MOVIE_VOTE_AVERAGE = 5.95;
     static final String ADD_MOVIE_POSTER_PATH = "\\/6bCplVkhowCjTHXWv49UjRPn0eK.jpg";
-    static final String ADD_MOVIE_OVERVIEW = "Fearing the actions of a god-like Super Hero left unchecked, Gotham City’s own formidable, forceful vigilante takes on Metropolis’s most revered, modern-day savior, while the world wrestles with what sort of hero it really needs. And with Batman and Superman at war with one another, a new threat quickly arises";
+    static final String ADD_MOVIE_OVERVIEW = "Fearing the actions of a god-like Super Hero left unchecked, Gotham City’s own formidable," +
+            " forceful vigilante takes on Metropolis’s most revered, modern-day savior, while the world wrestles with what sort of hero it " +
+            "really needs. And with Batman and Superman at war with one another, a new threat quickly arises";
 
 
     @TargetApi(11)
@@ -26,12 +28,12 @@ public class TestFetchPopularMoviesTask extends AndroidTestCase {
                 new String[]{Integer.toString(ADD_MOVIE_ID)});
 
         FetchPopularMoviesTask fwt = new FetchPopularMoviesTask(getContext());
-        int movieId = fwt.addMovie(ADD_MOVIE_ID, ADD_MOVIE_TITLE, ADD_MOVIE_RELEASE_DATE, ADD_MOVIE_POSTER_PATH,
+        long movieRowId = fwt.addMovie(ADD_MOVIE_ID, ADD_MOVIE_TITLE, ADD_MOVIE_RELEASE_DATE, ADD_MOVIE_POSTER_PATH,
                 ADD_MOVIE_POPULARITY, ADD_MOVIE_VOTE_AVERAGE, ADD_MOVIE_OVERVIEW);
 
         // does addMovie return a valid record ID?
         assertFalse("Error: addMovie returned an invalid ID on insert",
-                movieId == -1);
+                movieRowId == -1);
 
         // test all this twice
         for ( int i = 0; i < 2; i++ ) {
@@ -40,6 +42,7 @@ public class TestFetchPopularMoviesTask extends AndroidTestCase {
             Cursor movieCursor = getContext().getContentResolver().query(
                     MovieContract.MovieEntry.CONTENT_URI,
                     new String[]{
+                            MovieContract.MovieEntry._ID,
                             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
                             MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,
                             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
@@ -49,26 +52,28 @@ public class TestFetchPopularMoviesTask extends AndroidTestCase {
                             MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW
                     },
                     MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
-                    new String[]{String.valueOf(movieId)},
+                    new String[]{String.valueOf(ADD_MOVIE_ID)},
                     null);
 
           //  String title =movieCursor.getString(1);
             // these match the indices of the projection
             if (movieCursor.moveToFirst()) {
-                assertEquals("Error: the queried value of movieId does not match the returned value" +
-                        "from addMovie", movieCursor.getInt(0), movieId);
+                assertEquals("Error: the queried value of movieRowId does not match the returned value" +
+                        "from addMovie", movieCursor.getLong(0), movieRowId);
+                assertEquals("Error: the queried value of movieId is incorrect",
+                        movieCursor.getLong(1), ADD_MOVIE_ID);
                 assertEquals("Error: the queried value of title is incorrect",
-                        movieCursor.getString(1), ADD_MOVIE_TITLE);
+                        movieCursor.getString(2), ADD_MOVIE_TITLE);
                 assertEquals("Error: the queried value of release date is incorrect",
-                        movieCursor.getString(2), ADD_MOVIE_RELEASE_DATE);
+                        movieCursor.getString(3), ADD_MOVIE_RELEASE_DATE);
                 assertEquals("Error: the queried value of popularity value is incorrect",
-                        movieCursor.getDouble(3), ADD_MOVIE_POPULARITY);
+                        movieCursor.getDouble(4), ADD_MOVIE_POPULARITY);
                 assertEquals("Error: the queried value of vote average is incorrect",
-                        movieCursor.getDouble(4), ADD_MOVIE_VOTE_AVERAGE);
+                        movieCursor.getDouble(5), ADD_MOVIE_VOTE_AVERAGE);
                 assertEquals("Error: the queried value of poster path is incorrect",
-                        movieCursor.getString(5), ADD_MOVIE_POSTER_PATH);
+                        movieCursor.getString(6), ADD_MOVIE_POSTER_PATH);
                 assertEquals("Error: the queried value of movie overview is incorrect",
-                        movieCursor.getString(6), ADD_MOVIE_OVERVIEW);
+                        movieCursor.getString(7), ADD_MOVIE_OVERVIEW);
             } else {
                 fail("Error: the id you used to query returned an empty cursor");
             }
@@ -78,11 +83,11 @@ public class TestFetchPopularMoviesTask extends AndroidTestCase {
                     movieCursor.moveToNext());
 
             // add the movie again
-            int newMovieId = fwt.addMovie(ADD_MOVIE_ID, ADD_MOVIE_TITLE, ADD_MOVIE_RELEASE_DATE, ADD_MOVIE_POSTER_PATH,
+           long newMovieRowId = fwt.addMovie(ADD_MOVIE_ID, ADD_MOVIE_TITLE, ADD_MOVIE_RELEASE_DATE, ADD_MOVIE_POSTER_PATH,
                     ADD_MOVIE_POPULARITY, ADD_MOVIE_VOTE_AVERAGE, ADD_MOVIE_OVERVIEW);
 
             assertEquals("Error: inserting a location again should return the same ID",
-                    movieId, newMovieId);
+                    movieRowId, newMovieRowId);
         }
         // reset our state back to normal
         getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
