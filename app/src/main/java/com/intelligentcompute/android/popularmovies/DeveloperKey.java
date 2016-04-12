@@ -6,6 +6,6 @@ package com.intelligentcompute.android.popularmovies;
 public class DeveloperKey {
 
 
-    public static final String DEVELOPER_KEY = "AIzaSyDgb3pf7dFnibikYAg9u-5fVUOC0TyTPXw";
+    public static final String DEVELOPER_KEY = "***";
 
 }
