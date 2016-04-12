@@ -18,6 +18,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.intelligentcompute.android.popularmovies.MainActivity" />
+        </activity>
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity" >
@@ -25,14 +33,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.intelligentcompute.android.popularmovies.MainActivity" />
         </activity>
-        <activity
-            android:name=".DetailActivityWithSlidingTabs"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.intelligentcompute.android.popularmovies.MainActivity" />
-        </activity>
+
 
         <provider
             android:authorities="com.intelligentcompute.android.popularmovies"

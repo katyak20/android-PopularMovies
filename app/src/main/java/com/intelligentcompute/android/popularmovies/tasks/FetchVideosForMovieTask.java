@@ -2,6 +2,7 @@ package com.intelligentcompute.android.popularmovies.tasks;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -57,7 +58,7 @@ public class FetchVideosForMovieTask extends AsyncTask<ArrayList<String>, Void, 
                     final String API_KEY_PARAM = "api_key";
 
                     Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
-                            .appendQueryParameter(API_KEY_PARAM, "***")
+                            .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
                             .build();
 
                     URL url = new URL(builtUri.toString());
@@ -173,7 +174,12 @@ public class FetchVideosForMovieTask extends AsyncTask<ArrayList<String>, Void, 
         if ( cVideosVector.size() > 0 ) {
             ContentValues[] cvArray = new ContentValues[cVideosVector.size()];
             cVideosVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(MovieContract.VideoEntry.CONTENT_URI, cvArray);
+            try {
+                inserted = mContext.getContentResolver().bulkInsert(MovieContract.VideoEntry.CONTENT_URI, cvArray);
+            }
+            catch (SQLiteConstraintException e) {
+                Log.e(LOG_TAG, "failed to insert video entry" +e);
+            }
         }
 
         Log.d(LOG_TAG, "FetchVideosForMovieTask Complete. " + inserted + " Inserted");

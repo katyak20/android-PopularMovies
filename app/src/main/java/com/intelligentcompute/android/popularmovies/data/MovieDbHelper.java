@@ -41,6 +41,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 ReviewsEntry.COLUMN_MOVIE_KEY + " INTEGER NOT NULL, " +
                 ReviewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
                 ReviewsEntry.COLUMN_CONTENT + " TEXT NOT NULL, " +
+                "UNIQUE("+ReviewsEntry.COLUMN_MOVIE_KEY + ", " +ReviewsEntry.COLUMN_AUTHOR + "), " +
                 // Set up the location column as a foreign key to location table.
                 " FOREIGN KEY (" + ReviewsEntry.COLUMN_MOVIE_KEY + ") REFERENCES " +
                 MovieEntry.TABLE_NAME + " (" + MovieEntry.COLUMN_MOVIE_ID + ") " +
@@ -52,7 +53,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
                 // the ID of the movie entry associated with this videos data
                 VideoEntry.COLUMN_MOVIE_KEY + " INTEGER NOT NULL, " +
-                VideoEntry.COLUMN_TRAILER_PATH + " TEXT NOT NULL, " +
+                VideoEntry.COLUMN_TRAILER_PATH + " TEXT UNIQUE, " +
                 VideoEntry.COLUMN_DESCRIPTION + " TEXT NOT NULL, " +
                 // Set up the location column as a foreign key to location table.
                 " FOREIGN KEY (" + VideoEntry.COLUMN_MOVIE_KEY + ") REFERENCES " +

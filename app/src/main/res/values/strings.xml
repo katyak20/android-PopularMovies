@@ -11,6 +11,6 @@
     <string name="error_player">Error launching player</string>
     <string name="playerview_text">Test Youtube Player</string>
     <string name="vote_average">Vote Average  </string>
-    <string name="popularity">Popularity     </string>
+    <string name="releaseDate">Release Date : </string>
     <string name="action_share">Share</string>
 </resources>

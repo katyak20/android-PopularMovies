@@ -20,6 +20,7 @@ public class MovieProvider extends ContentProvider {
     static final int MOVIES = 100;
     static final int MOVIES_BY_POPULARITY = 101;
     static final int MOVIES_BY_VOTE_AVERAGE = 102;
+    static final int MOVIE_DETAILS = 110;
     static final int REVIEWS = 200;
     static final int REVIEWS_FOR_MOVIE = 201;
     static final int VIDEOS = 300;
@@ -60,6 +61,11 @@ public class MovieProvider extends ContentProvider {
             MovieContract.MovieEntry.TABLE_NAME;
 
     //movies.sort_by.vote_average.desc
+
+    //movies.movie_id = ?
+    private static final String sMovieDetailsByMovieIdSelection =
+            MovieContract.MovieEntry.TABLE_NAME +
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ";
 
     //reviews.movie_id = ?
     private static final String sReviewsByMovieIdSelection =
@@ -115,6 +121,27 @@ public class MovieProvider extends ContentProvider {
         );
     }
 
+    private Cursor getMovieDetails(Uri uri, String[] projection) {
+        String movieIdFromUri = MovieContract.MovieEntry.getMovieIdFromUri(uri);
+
+        String[] selectionArgs;
+        String selection;
+
+        selection = sMovieDetailsByMovieIdSelection;
+        selectionArgs = new String[]{movieIdFromUri};
+
+
+
+        return mOpenHelper.getReadableDatabase().query(MovieContract.MovieEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+    }
+
     private Cursor getMoviesSorted(
             Uri uri, String[] projection, String sortOrder) {
 
@@ -146,6 +173,8 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(authority, MovieContract.PATH_REVIEW + "/*", REVIEWS_FOR_MOVIE);
 
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIES);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE+ "/*", MOVIE_DETAILS);
+
         return matcher;
     }
 
@@ -187,6 +216,8 @@ public class MovieProvider extends ContentProvider {
                 return MovieContract.VideoEntry.CONTENT_TYPE;
             case VIDEOS_FOR_MOVIE:
                 return MovieContract.VideoEntry.CONTENT_TYPE;
+            case MOVIE_DETAILS:
+                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -208,6 +239,11 @@ public class MovieProvider extends ContentProvider {
             // "weather/*"
             case MOVIES_BY_VOTE_AVERAGE: {
                 retCursor = getMoviesSorted(uri, projection, sortOrder);
+                break;
+            }
+            case MOVIE_DETAILS:
+            {
+                retCursor = getMovieDetails(uri, projection);
                 break;
             }
             case VIDEOS_FOR_MOVIE:

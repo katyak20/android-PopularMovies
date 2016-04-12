@@ -6,12 +6,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.intelligentcompute.android.popularmovies.DetailActivityWithSlidingTabs;
 import com.intelligentcompute.android.popularmovies.data.MovieContract;
 
 import org.json.JSONArray;
@@ -70,7 +70,7 @@ public class FetchReviewsForMovieTask  extends AsyncTask<ArrayList<String>, Void
                 final String API_KEY_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse(VIDEO_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY_PARAM, "***")
+                        .appendQueryParameter(API_KEY_PARAM, "e257613f461ed40c956dc1464fb16313")
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -149,38 +149,47 @@ public class FetchReviewsForMovieTask  extends AsyncTask<ArrayList<String>, Void
         ArrayList<HashMap<String, String>> reviewsList = new ArrayList<>();
 
 
-        JSONObject movieReviewsJson = new JSONObject(reviewsJsonStr);
-        JSONArray reviewsArray = movieReviewsJson.getJSONArray(REVIEWS_RESULTS);
-        int movieId = movieReviewsJson.getInt("id");
-        Vector<ContentValues> cReviewsVector = new Vector<ContentValues>(reviewsArray.length());
+        if (reviewsJsonStr !=null) {
+            JSONObject movieReviewsJson = new JSONObject(reviewsJsonStr);
+            JSONArray reviewsArray = movieReviewsJson.getJSONArray(REVIEWS_RESULTS);
+            int movieId = movieReviewsJson.getInt("id");
+            Vector<ContentValues> cReviewsVector = new Vector<ContentValues>(reviewsArray.length());
 
-        for (int i = 0; i < reviewsArray.length(); i++) {
-            HashMap<String, String> reviews = new HashMap();
+            for (int i = 0; i < reviewsArray.length(); i++) {
+                HashMap<String, String> reviews = new HashMap();
 
-            ContentValues reviewValues = new ContentValues();
-            reviews.put(MOVIE_ID, String.valueOf(movieId));
-            reviews.put(REVIEW_AUTHOR, reviewsArray.getJSONObject(i).getString(REVIEW_AUTHOR));
-            reviews.put(REVIEW_CONTENT, reviewsArray.getJSONObject(i).getString(REVIEW_CONTENT));
-            reviewsList.add(reviews);
+                ContentValues reviewValues = new ContentValues();
+                reviews.put(MOVIE_ID, String.valueOf(movieId));
+                reviews.put(REVIEW_AUTHOR, reviewsArray.getJSONObject(i).getString(REVIEW_AUTHOR));
+                reviews.put(REVIEW_CONTENT, reviewsArray.getJSONObject(i).getString(REVIEW_CONTENT));
+                reviewsList.add(reviews);
 
-            reviewValues.put(MOVIE_ID, movieId);
-            reviewValues.put(REVIEW_AUTHOR, reviewsArray.getJSONObject(i).getString(REVIEW_AUTHOR));
-            reviewValues.put(REVIEW_CONTENT, reviewsArray.getJSONObject(i).getString(REVIEW_CONTENT));
-            cReviewsVector.add(reviewValues);
-            //  Log.v(LOG_TAG, "ReviewContent" + reviewsJson.getString(REVIEW_CONTENT));
+                reviewValues.put(MOVIE_ID, movieId);
+                reviewValues.put(REVIEW_AUTHOR, reviewsArray.getJSONObject(i).getString(REVIEW_AUTHOR));
+                reviewValues.put(REVIEW_CONTENT, reviewsArray.getJSONObject(i).getString(REVIEW_CONTENT));
+                cReviewsVector.add(reviewValues);
+                //  Log.v(LOG_TAG, "ReviewContent" + reviewsJson.getString(REVIEW_CONTENT));
+            }
+
+            int inserted = 0;
+            // add to database
+            if ( cReviewsVector.size() > 0 ) {
+                ContentValues[] cvArray = new ContentValues[cReviewsVector.size()];
+                cReviewsVector.toArray(cvArray);
+                try {
+                    inserted = mContext.getContentResolver().bulkInsert(MovieContract.ReviewsEntry.CONTENT_URI, cvArray);
+                }
+                catch (SQLiteConstraintException e) {
+                    Log.e(LOG_TAG, "failed to insert reviews entries" + e);
+                }
+            }
+
+            Log.d(LOG_TAG, "FetchReviewsForMovieTask Complete. " + inserted + " Inserted");
+
+            return reviewsList;
         }
 
-        int inserted = 0;
-        // add to database
-        if ( cReviewsVector.size() > 0 ) {
-            ContentValues[] cvArray = new ContentValues[cReviewsVector.size()];
-            cReviewsVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(MovieContract.ReviewsEntry.CONTENT_URI, cvArray);
-        }
-
-        Log.d(LOG_TAG, "FetchReviewsForMovieTask Complete. " + inserted + " Inserted");
-
-        return reviewsList;
+        return null;
     }
 
 }

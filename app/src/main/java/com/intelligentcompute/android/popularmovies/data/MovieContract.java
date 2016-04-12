@@ -121,8 +121,12 @@ public class MovieContract {
 
         }
 
-       public static Uri buildSelectedMovieUri(int movieId) {
-            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
+       public static Uri buildSelectedMovieUri(String movieId) {
+            return CONTENT_URI.buildUpon().appendPath(movieId).build();
+        }
+
+        public static String getMovieIdFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
 /*
         public static Uri buildVideosForMovie(String movieId) {
